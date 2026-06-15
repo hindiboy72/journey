@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sayed Mohammad Mujtaba</title>
+    <link rel="stylesheet" href="css.css">
+</head>
+<body data-theme="midnight-rpg">
+
+    <!-- ==================== AUDIO ENGINE (HIDDEN) ==================== -->
+    <!-- Sound effects will be generated programmatically using AudioContext -->
+    
+    <!-- ==================== CONFETTI CANVAS (HIDDEN) ==================== -->
+    <canvas id="confettiCanvas" style="position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9999;display:none;"></canvas>
+
+    <!-- ==================== HEADER ==================== -->
+    <header class="header">
+        <div class="header-brand">
+            <span class="header-logo">⚔️</span>
+            <span class="header-title">JEE RPG</span>
+            <span class="header-version">v3.0</span>
+        </div>
+        <div class="header-stats">
+            <span class="stat-badge gems" id="headerGems">💎 <span>20</span></span>
+            <span class="stat-badge stars" id="headerStars">⭐ <span>50</span></span>
+            <span class="stat-badge streak" id="headerStreak">🔥 <span>0</span></span>
+            <span class="stat-badge xp" id="headerXP">✨ <span>0</span></span>
+            <span class="stat-badge reputation">🏅 <span id="headerReputation">0</span></span>
+        </div>
+        <div class="header-actions">
+            <button class="btn-icon" id="btnMuteToggle" title="Toggle Sound">🔊</button>
+            <div class="theme-picker">
+                <button class="btn btn-theme" id="themeToggleBtn" title="Change Theme">🌙 Theme</button>
+                <div class="theme-dropdown" id="themeSwitcherDropdown"></div>
+            </div>
+        </div>
+    </header>
+
+    <!-- ==================== TAB NAVIGATION ==================== -->
+    <nav class="tab-nav" id="tabNav">
+        <button class="tab-btn active" data-tab="dashboard">📊 Dashboard</button>
+        <button class="tab-btn" data-tab="quests">📋 Quests</button>
+        <button class="tab-btn" data-tab="subjects">📚 Subjects</button>
+        <button class="tab-btn" data-tab="calendar">📅 Calendar</button>
+        <button class="tab-btn" data-tab="shop">🛒 Shop</button>
+        <button class="tab-btn" data-tab="hall">🏆 Hall of Fame</button>
+        <button class="tab-btn" data-tab="vault">🔒 Focus Vault</button>
+        <button class="tab-btn" data-tab="backlog">📝 Backlog</button>
+        <button class="tab-btn" data-tab="spaced-rep">🧠 Spaced Rep</button>
+        <button class="tab-btn" data-tab="partner">🤝 Partner</button>
+        <button class="tab-btn" data-tab="insights">📈 Insights</button>
+        <button class="tab-btn" data-tab="settings">⚙️ Settings</button>
+    </nav>
+
+    <!-- ==================== MAIN CONTENT ==================== -->
+    <main class="main-content" id="mainContent">
+
+        <!-- ===== DASHBOARD PANEL ===== -->
+        <section class="tab-panel active" id="panel-dashboard">
+            <div class="card card-stats">
+                <div class="card-header"><span class="icon">📊</span> Your Stats</div>
+                <div class="widget-row">
+                    <div class="widget">
+                        <div class="widget-value" id="countdownDisplay">210</div>
+                        <div class="widget-label">Days Until JEE Main</div>
+                    </div>
+                    <div class="widget">
+                        <div class="widget-value" id="streakDisplay">0 🔥</div>
+                        <div class="widget-label">Current Streak</div>
+                    </div>
+                    <div class="widget">
+                        <div class="widget-value" id="totalHoursDisplay">0h</div>
+                        <div class="widget-label">Total Study Hours</div>
+                    </div>
+                    <div class="widget">
+                        <div class="widget-value" id="questionsDisplay">0</div>
+                        <div class="widget-label">Questions Solved</div>
+                    </div>
+                </div>
+                <div class="phase-indicator">
+                    <span class="phase-badge phase-1" id="phaseBadge">Phase 1: Foundation Recovery</span>
+                </div>
+            </div>
+
+            <div class="card card-checkin">
+                <div class="card-header"><span class="icon">📅</span> Daily Check-In</div>
+                <p class="checkin-msg" id="checkinMsg">Start your streak today! Every day counts.</p>
+                <div class="checkin-row">
+                    <button class="btn primary btn-checkin" id="btnCheckIn">✅ Check In for Today</button>
+                    <span class="freeze-info" id="freezeInfo">Freeze Tokens: <strong>0</strong></span>
+                </div>
+            </div>
+
+            <div class="card card-heatmap">
+                <div class="card-header"><span class="icon">🗺️</span> Study Heatmap (Last 28 Days)</div>
+                <div class="heatmap" id="heatmapContainer"></div>
+                <div class="heatmap-legend">
+                    <span>Less</span>
+                    <span class="legend-dot empty"></span>
+                    <span class="legend-dot h1"></span>
+                    <span class="legend-dot h2"></span>
+                    <span class="legend-dot h3"></span>
+                    <span class="legend-dot h4"></span>
+                    <span>More</span>
+                </div>
+            </div>
+
+            <div class="card card-motivation">
+                <div class="card-header"><span class="icon">💬</span> Motivational Message</div>
+                <p id="motivationalMsg">Every great journey starts with a single day. Start today!</p>
+            </div>
+
+            <div class="card card-log">
+                <div class="card-header"><span class="icon">📝</span> Quick Log Study</div>
+                <div class="log-row">
+                    <input type="number" id="logHours" placeholder="Hours" min="0" max="12" step="0.5" class="input-field" style="width:70px;">
+                    <input type="number" id="logQuestions" placeholder="Questions" min="0" max="500" step="1" class="input-field" style="width:90px;">
+                    <select id="logSubject" class="input-field" style="width:110px;">
+                        <option value="general">📚 General</option>
+                        <option value="physics">⚛️ Physics</option>
+                        <option value="chemistry">🧪 Chemistry</option>
+                        <option value="math">📐 Math</option>
+                    </select>
+                    <input type="text" id="logNotes" placeholder="Notes (optional)" class="input-field" style="width:140px;">
+                    <button class="btn primary" id="btnLogStudy">📥 Log Activity</button>
+                </div>
+                <p class="log-hint">Logging study advances your active quests automatically.</p>
+            </div>
+
+            <div class="card card-reflection">
+                <div class="card-header"><span class="icon">💭</span> Daily Reflection</div>
+                <div class="reflection-row">
+                    <input type="text" id="reflectionInput" placeholder="How did your study go today?" class="input-field" style="flex:1;">
+                    <button class="btn success" id="btnSaveReflection">💾 Save</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== QUESTS PANEL ===== -->
+        <section class="tab-panel" id="panel-quests">
+            <div class="card">
+                <div class="card-header"><span class="icon">🔥</span> Daily Missions</div>
+                <div id="dailyQuestsContainer"></div>
+            </div>
+            <div class="card">
+                <div class="card-header"><span class="icon">🗡️</span> Weekly Missions</div>
+                <div id="weeklyQuestsContainer"></div>
+            </div>
+            <div class="card">
+                <div class="card-header"><span class="icon">👾</span> Boss Battles</div>
+                <div id="bossQuestsContainer"></div>
+            </div>
+            <div class="card">
+                <div class="card-header"><span class="icon">🔄</span> Recovery Quests</div>
+                <div id="recoveryQuestsContainer"></div>
+            </div>
+            <div class="card card-completed">
+                <div class="card-header"><span class="icon">✅</span> Recently Completed</div>
+                <div id="completedQuestsContainer">
+                    <p class="empty-state-text">Complete quests to see them here!</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== SUBJECTS PANEL ===== -->
+        <section class="tab-panel" id="panel-subjects">
+            <div class="card">
+                <div class="card-header"><span class="icon">📚</span> Subject Progression</div>
+                <p class="section-desc">Track your mastery in each subject. Earn XP by logging study sessions.</p>
+                <div id="subjectsContainer"></div>
+            </div>
+        </section>
+
+        <!-- ===== CALENDAR PANEL ===== -->
+        <section class="tab-panel" id="panel-calendar">
+            <div class="card">
+                <div class="card-header">
+                    <span class="icon">📅</span> Study Calendar
+                    <div class="calendar-nav">
+                        <button class="btn small" id="btnPrevMonth">◀</button>
+                        <span id="calendarTitle" class="calendar-title-text">Loading...</span>
+                        <button class="btn small" id="btnNextMonth">▶</button>
+                    </div>
+                </div>
+                <div class="calendar-grid" id="calendarGrid"></div>
+                <p class="calendar-summary" id="calendarSummary"></p>
+            </div>
+        </section>
+
+        <!-- ===== SHOP PANEL ===== -->
+        <section class="tab-panel" id="panel-shop">
+            <div class="card">
+                <div class="card-header"><span class="icon">🛒</span> Common Purchases (Breaks)</div>
+                <div id="shopCommonContainer"></div>
+            </div>
+            <div class="card">
+                <div class="card-header"><span class="icon">🎬</span> Entertainment</div>
+                <div id="shopEntertainmentContainer"></div>
+            </div>
+            <div class="card">
+                <div class="card-header"><span class="icon">⭐</span> Premium Rewards</div>
+                <div id="shopPremiumContainer"></div>
+            </div>
+            <div class="card">
+                <div class="card-header"><span class="icon">🛡️</span> Streak Protection</div>
+                <p class="section-desc">Freeze Tokens protect your streak when you miss a day. Max 3 stored.</p>
+                <div class="freeze-row">
+                    <button class="btn gold" id="btnBuyFreeze">🛡️ Buy Freeze Token — 15 💎</button>
+                    <span id="shopFreezeInfo">Tokens: 0</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== HALL OF FAME PANEL ===== -->
+        <section class="tab-panel" id="panel-hall">
+            <div class="card">
+                <div class="card-header"><span class="icon">📚</span> Study Achievements</div>
+                <div id="achStudyContainer"></div>
+            </div>
+            <div class="card">
+                <div class="card-header"><span class="icon">📝</span> Test Achievements</div>
+                <div id="achTestContainer"></div>
+            </div>
+            <div class="card">
+                <div class="card-header"><span class="icon">🏆</span> Milestone Achievements</div>
+                <div id="achMilestoneContainer"></div>
+            </div>
+            <div class="card">
+                <div class="card-header"><span class="icon">🎖️</span> All Badges</div>
+                <div class="badge-grid" id="badgesContainer"></div>
+            </div>
+            <div class="card" id="badgeOfTheDayCard">
+                <div class="card-header"><span class="icon">🌟</span> Badge of the Day</div>
+                <div id="badgeOfTheDayContainer">
+                    <p class="empty-state-text">Complete more achievements to unlock the Badge of the Day!</p>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-header"><span class="icon">🏅</span> Productivity Rank</div>
+                <div id="rankDisplay"></div>
+            </div>
+        </section>
+
+        <!-- ===== FOCUS VAULT PANEL ===== -->
+        <section class="tab-panel" id="panel-vault">
+            <div class="card">
+                <div class="card-header"><span class="icon">🔒</span> Focus Safe (Study Vault)</div>
+                <p class="section-desc">Lock in a study session. Earn <strong>1.5x bonus stars</strong> for completing timed sessions!</p>
+                <div class="timer-display" id="timerDisplay">00:00</div>
+                <div class="timer-controls">
+                    <button class="btn primary timer-preset-btn" id="btnTimer30">30 min</button>
+                    <button class="btn primary timer-preset-btn" id="btnTimer60">1 hour</button>
+                    <button class="btn primary timer-preset-btn" id="btnTimer120">2 hours</button>
+                    <button class="btn primary timer-preset-btn" id="btnTimer240">4 hours</button>
+                    <button class="btn danger" id="btnTimerStop" style="display:none;">⏹ Stop</button>
+                </div>
+                <p class="timer-status" id="timerStatus">Select a duration to start a focused session.</p>
+            </div>
+            <div class="card">
+                <div class="card-header"><span class="icon">🍅</span> Pomodoro Timer</div>
+                <p class="section-desc">25-minute focused work sessions with automatic breaks.</p>
+                <div class="timer-controls">
+                    <button class="btn primary timer-preset-btn" id="btnPomodoro">🍅 25 min Work</button>
+                    <button class="btn primary timer-preset-btn" id="btnPomodoro50">🍅 50 min Work</button>
+                </div>
+                <p class="pomodoro-stats">🍅 Pomodoros completed: <strong id="pomodoroCount">0</strong></p>
+            </div>
+            <div class="card">
+                <div class="card-header"><span class="icon">🏅</span> Productivity Rank</div>
+                <div id="rankDisplayVault"></div>
+            </div>
+        </section>
+
+        <!-- ===== BACKLOG PANEL ===== -->
+        <section class="tab-panel" id="panel-backlog">
+            <div class="card">
+                <div class="card-header"><span class="icon">📝</span> Backlog Tracker</div>
+                <p class="section-desc">Track pending chapters, topics, and tasks. Mark them complete to earn XP!</p>
+                <div class="backlog-add-row">
+                    <input type="text" id="backlogNameInput" placeholder="Task name..." class="input-field" style="flex:1;">
+                    <select id="backlogSubjectSelect" class="input-field" style="width:110px;">
+                        <option value="general">📚 General</option>
+                        <option value="physics">⚛️ Physics</option>
+                        <option value="chemistry">🧪 Chemistry</option>
+                        <option value="math">📐 Math</option>
+                    </select>
+                    <select id="backlogPrioritySelect" class="input-field" style="width:100px;">
+                        <option value="medium">Medium</option>
+                        <option value="high">High</option>
+                        <option value="low">Low</option>
+                    </select>
+                    <button class="btn primary" id="btnAddBacklog">➕ Add</button>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-header"><span class="icon">📋</span> Backlog Items</div>
+                <div id="backlogList"></div>
+            </div>
+        </section>
+
+        <!-- ===== SPACED REPETITION PANEL ===== -->
+        <section class="tab-panel" id="panel-spaced-rep">
+            <div class="card">
+                <div class="card-header"><span class="icon">🧠</span> Spaced Repetition Queue</div>
+                <p class="section-desc">Your intelligent review schedule. Complete reviews on time to earn bonus XP!</p>
+                <div class="overdue-alert" id="overdueAlert" style="display:none;">
+                    ⚠️ You have <strong id="overdueCount">0</strong> overdue review(s)! Complete them to avoid a penalty.
+                </div>
+                <div id="spacedRepList">
+                    <p class="empty-state-text">No reviews scheduled yet. Complete backlog items to add them here!</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== PARTNER PANEL ===== -->
+        <section class="tab-panel" id="panel-partner">
+            <div class="card">
+                <div class="card-header"><span class="icon">🤝</span> Study Partner (Manual Sync)</div>
+                <p class="section-desc">
+                    This works by manually sharing progress files. 
+                    <strong>You → Export Partner Data</strong> and send the file. 
+                    <strong>Partner → Imports it here.</strong>
+                </p>
+                <div class="partner-setup" id="partnerSetup">
+                    <div class="partner-code-display">
+                        <label>Your Share Code:</label>
+                        <div class="share-code-box">
+                            <code id="myShareCode">Generating...</code>
+                            <button class="btn small" id="btnCopyCode">📋 Copy</button>
+                        </div>
+                    </div>
+                    <div class="partner-actions-row">
+                        <button class="btn primary" id="btnExportPartnerData">📤 Export My Progress for Partner</button>
+                        <button class="btn success" id="btnImportPartnerTrigger">📥 Import Partner's Progress</button>
+                    </div>
+                </div>
+                <div class="partner-status" id="partnerStatus">
+                    <p id="partnerStatusText">No partner data imported yet. Import their file to see comparison!</p>
+                </div>
+            </div>
+
+            <!-- Partner Comparison Card (Hidden until data is imported) -->
+            <div class="card" id="partnerComparisonCard" style="display:none;">
+                <div class="card-header"><span class="icon">📊</span> Daily Comparison</div>
+                <div class="partner-comparison" id="partnerComparison">
+                    <div class="partner-col">
+                        <h4>🙋 You</h4>
+                        <div class="partner-stat">⏰ <span id="partnerYouHours">0</span>h today</div>
+                        <div class="partner-stat">✏️ <span id="partnerYouQuestions">0</span> questions</div>
+                        <div class="partner-stat">🔥 <span id="partnerYouStreak">0</span>-day streak</div>
+                    </div>
+                    <div class="partner-vs">VS</div>
+                    <div class="partner-col">
+                        <h4>🤝 Partner</h4>
+                        <div class="partner-stat">⏰ <span id="partnerTheyHours">0</span>h today</div>
+                        <div class="partner-stat">✏️ <span id="partnerTheyQuestions">0</span> questions</div>
+                        <div class="partner-stat">🔥 <span id="partnerTheyStreak">0</span>-day streak</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Partner Import Modal -->
+        <div class="modal-overlay" id="partnerImportModal" style="display:none;">
+            <div class="modal">
+                <h3>📥 Import Partner's Progress</h3>
+                <p class="modal-warning">Paste the file your partner sent you to see their progress.</p>
+                <textarea id="partnerImportDataText" placeholder="Paste your partner's save data JSON here..."></textarea>
+                <div class="modal-actions">
+                    <button class="btn" id="btnPartnerImportCancel">Cancel</button>
+                    <button class="btn success" id="btnPartnerImportConfirm">✅ Compare with Partner</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== INSIGHTS PANEL ===== -->
+        <section class="tab-panel" id="panel-insights">
+            <div class="card">
+                <div class="card-header"><span class="icon">📈</span> Weekly Study Chart</div>
+                <div class="chart-container">
+                    <svg id="weeklyChart" viewBox="0 0 600 200" preserveAspectRatio="xMidYMid meet"></svg>
+                </div>
+                <div id="chartSummary" class="chart-summary-text"></div>
+            </div>
+            <div class="card">
+                <div class="card-header"><span class="icon">🔍</span> Performance Insights</div>
+                <div id="insightsContent">
+                    <p class="empty-state-text">Log more study sessions to see insights!</p>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-header"><span class="icon">📊</span> Weekly Report</div>
+                <div id="weeklyReportsList"></div>
+            </div>
+        </section>
+
+        <!-- ===== SETTINGS PANEL ===== -->
+        <section class="tab-panel" id="panel-settings">
+            <div class="card">
+                <div class="card-header"><span class="icon">⚙️</span> Data Management</div>
+                <p class="section-desc">Export your progress to back it up, or import a previously saved state. You can also reset everything.</p>
+                <div class="settings-actions">
+                    <button class="btn primary" id="btnExport">📤 Export Save Data</button>
+                    <button class="btn success" id="btnImportTrigger">📥 Import Save Data</button>
+                    <button class="btn danger" id="btnReset">🗑️ Reset All Data</button>
+                </div>
+                <div class="settings-info-row">
+                    <span class="settings-label">Auto-Save:</span>
+                    <span class="settings-value success-text">✅ Active (every action saved to browser)</span>
+                </div>
+                <div class="settings-info-row">
+                    <span class="settings-label">Storage Used:</span>
+                    <span class="settings-value" id="storageSize">Calculating...</span>
+                </div>
+                <div class="settings-info-row">
+                    <span class="settings-label">Sound Effects:</span>
+                    <span class="settings-value" id="soundStatus">Enabled</span>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-header"><span class="icon">📅</span> Exam Date Configuration</div>
+                <div class="settings-row">
+                    <label>JEE Main Date:</label>
+                    <input type="date" id="examDateInput" class="input-field" style="width:auto;">
+                    <button class="btn primary small" id="btnUpdateExamDate">Update</button>
+                </div>
+                <p class="settings-hint">Changing the exam date will recalculate your phase and countdown.</p>
+            </div>
+            <div class="card">
+                <div class="card-header"><span class="icon">ℹ️</span> About JEE RPG</div>
+                <p class="about-text">
+                    <strong>JEE RPG Productivity Operating System</strong> v3.0<br><br>
+                    A gamified study tracker designed for JEE aspirants.<br>
+                    • Phase-based quests aligned with exam timeline<br>
+                    • Earn gems 💎 & stars ⭐ through quests<br>
+                    • Unlock achievements, badges, and ranks<br>
+                    • Subject leveling system with XP progression<br>
+                    • Focus Safe with bonus star multiplier<br>
+                    • Pomodoro Timer with automatic breaks<br>
+                    • Backlog tracker for pending tasks<br>
+                    • <strong>Spaced Repetition queue (NEW!)</strong><br>
+                    • <strong>Study Partner system (NEW!)</strong><br>
+                    • <strong>Weekly Insights & Charts (NEW!)</strong><br>
+                    • <strong>Sound effects & celebrations (NEW!)</strong><br>
+                    • Session history & weekly reports<br>
+                    • Study calendar with heatmap visualization<br>
+                    • Critical hit system for bonus XP<br>
+                    • Combo system for consecutive subject study<br>
+                    • All data stored locally in your browser<br>
+                    • Export/Import to transfer between devices
+                </p>
+            </div>
+        </section>
+    </main>
+
+    <!-- ==================== IMPORT MODAL ==================== -->
+    <div class="modal-overlay" id="importModal" style="display:none;">
+        <div class="modal">
+            <h3>📥 Import Save Data</h3>
+            <p class="modal-warning">
+                Paste your previously exported save data below.<br>
+                <strong class="danger-text">This will overwrite your current progress!</strong>
+            </p>
+            <textarea id="importDataText" placeholder="Paste your save data JSON here..."></textarea>
+            <div class="modal-actions">
+                <button class="btn" id="btnImportCancel">Cancel</button>
+                <button class="btn success" id="btnImportConfirm">✅ Import Data</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== BADGE UNLOCK MODAL ==================== -->
+    <div class="modal-overlay" id="badgeUnlockModal" style="display:none;">
+        <div class="modal badge-unlock-modal">
+            <div class="badge-unlock-icon" id="badgeUnlockIcon">🎖️</div>
+            <h2 id="badgeUnlockTitle">Badge Unlocked!</h2>
+            <p id="badgeUnlockDesc"></p>
+            <button class="btn primary" id="btnBadgeUnlockClose">Awesome!</button>
+        </div>
+    </div>
+
+    <!-- ==================== TOAST CONTAINER ==================== -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- ==================== SCRIPTS ==================== -->
+    <script src="js.js"></script>
+</body>
+</html>
